@@ -162,3 +162,84 @@ ui/
     Color.kt
     Theme.kt
     Type.kt
+
+This structure helps keep the project cleaner and makes reusable UI parts easier to manage.
+
+Features Demonstrated in Assignment 1
+
+This assignment demonstrates:
+
+Android Studio project setup
+Kotlin-based Android development
+Jetpack Compose UI
+Navigation Compose
+MVVM architecture
+reusable UI components
+state-driven UI updates
+basic form validation
+handling of edge cases such as empty lists
+Validation and Edge Cases
+
+One of the important parts of this milestone was implementing simple logic and validation.
+
+Validation example
+
+On the Scan Screen:
+
+receipt code cannot be blank
+receipt code must meet minimum length
+store name cannot be blank
+submit button is enabled only when input is valid
+Edge case example
+
+On the Rewards Screen:
+
+if there are no rewards, an empty-state message is displayed instead of leaving the UI blank
+Technologies Used
+Kotlin
+Jetpack Compose
+Material 3
+Navigation Compose
+MVVM
+Android Studio
+Current Limitations
+
+At this stage, the project still uses mock/static data.
+
+The following parts are not yet implemented:
+
+database persistence
+API/backend integration
+authentication
+real QR/receipt scanning
+reward redemption logic connected to storage
+
+These parts are planned for future milestones.
+
+How to Run the Project
+Open the project in Android Studio
+Let Gradle sync finish
+Run the app on an emulator or physical Android device
+The app starts from the Home Screen
+Assignment 1 Coverage
+
+This milestone covers the following requirements:
+
+runnable Android project
+GitHub repository with assignment branch
+Compose-based UI
+at least 5 screens
+reusable components placed in components folders
+MVVM structure
+navigation between screens
+basic input validation
+state-based UI updates
+Author
+
+Ali Handan
+IT student
+Mobile Programming course project
+
+Branch
+
+This implementation is prepared on the assignment-1 branch.
