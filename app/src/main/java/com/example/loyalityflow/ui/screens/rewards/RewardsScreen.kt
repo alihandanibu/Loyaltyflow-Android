@@ -2,9 +2,11 @@ package com.example.loyalityflow.ui.screens.rewards
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.loyalityflow.data.model.sampleCategories
 import com.example.loyalityflow.ui.screens.home.components.SectionHeader
+import com.example.loyalityflow.ui.screens.rewards.components.CategoryChip
 import com.example.loyalityflow.ui.screens.rewards.components.EmptyRewardsState
 import com.example.loyalityflow.ui.screens.rewards.components.RewardCard
 import com.example.loyalityflow.ui.screens.rewards.components.SearchBar
@@ -39,6 +43,20 @@ fun RewardsScreen(
             query = uiState.searchKeyword,
             onQueryChange = { viewModel.onSearchQueryChanged(it) }
         )
+
+        // Second LazyRow for categories (Requirement: At least two LazyRow elements)
+        LazyRow(
+            contentPadding = PaddingValues(bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            items(sampleCategories) { category ->
+                CategoryChip(
+                    category = category,
+                    isSelected = uiState.selectedCategory == category,
+                    onClick = { viewModel.onCategorySelected(category) }
+                )
+            }
+        }
 
         // Derived state display example
         if (uiState.affordableRewardsCount > 0) {

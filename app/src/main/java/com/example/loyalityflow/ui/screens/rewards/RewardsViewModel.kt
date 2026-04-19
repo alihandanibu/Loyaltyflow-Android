@@ -12,26 +12,40 @@ class RewardsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(RewardsUiState())
     val uiState: StateFlow<RewardsUiState> = _uiState.asStateFlow()
 
+    init {
+        updateFilteredRewards()
+    }
+
+    fun onCategorySelected(category: String) {
+        _uiState.update { it.copy(selectedCategory = category) }
+        updateFilteredRewards()
+    }
+
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchKeyword = query) }
         updateFilteredRewards()
     }
 
     private fun updateFilteredRewards() {
-        val query = _uiState.value.searchKeyword
-        val filtered = if (query.isEmpty()) {
-            sampleRewards
-        } else {
-            sampleRewards.filter { 
-                it.title.contains(query, ignoreCase = true) || 
-                it.description.contains(query, ignoreCase = true) 
-            }
-        }
-        
         _uiState.update { current ->
+            val filteredByCategory = if (current.selectedCategory == "All") {
+                sampleRewards
+            } else {
+                sampleRewards.filter { it.category == current.selectedCategory }
+            }
+
+            val filteredBySearch = if (current.searchKeyword.isEmpty()) {
+                filteredByCategory
+            } else {
+                filteredByCategory.filter {
+                    it.title.contains(current.searchKeyword, ignoreCase = true) ||
+                    it.description.contains(current.searchKeyword, ignoreCase = true)
+                }
+            }
+
             current.copy(
-                rewards = filtered,
-                affordableRewardsCount = filtered.count { it.pointsRequired < 100 }
+                rewards = filteredBySearch,
+                affordableRewardsCount = filteredBySearch.count { it.pointsRequired < 100 }
             )
         }
     }

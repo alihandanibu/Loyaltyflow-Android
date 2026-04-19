@@ -10,7 +10,9 @@ val sampleDashboardStats = DashboardStats(
 val sampleRewards = listOf(
     Reward(1, "Free coffee", "Redeem one regular coffee.", 50, "Food"),
     Reward(2, "Protein bar", "Healthy snack for members.", 80, "Snacks"),
-    Reward(3, "10% discount", "Discount on the next order.", 120, "Shopping")
+    Reward(3, "10% discount", "Discount on the next order.", 120, "Shopping"),
+    Reward(4, "Free Sandwich", "Fresh sandwich of your choice.", 150, "Food"),
+    Reward(5, "Logo Mug", "Limited edition company mug.", 200, "Merch")
 )
 
 val sampleOffers = listOf(
@@ -27,3 +29,5 @@ val sampleProfileInfo = ProfileInfo(
     totalScans = 12,
     totalRewardsRedeemed = 3
 )
+
+val sampleCategories = listOf("All", "Food", "Snacks", "Shopping", "Merch")
