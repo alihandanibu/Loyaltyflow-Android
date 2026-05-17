@@ -1,4 +1,4 @@
-package com.example.loyalityflow.data.model
+package com.example.loyalityflow.model
 
 data class DashboardStats(
     val userName: String,

@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.loyalityflow.data.model.Offer
+import com.example.loyalityflow.model.Offer
 
 @Composable
 fun FeaturedOfferCard(offer: Offer) {

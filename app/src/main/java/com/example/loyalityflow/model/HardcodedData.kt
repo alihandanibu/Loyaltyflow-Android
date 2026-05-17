@@ -1,4 +1,4 @@
-package com.example.loyalityflow.data.model
+package com.example.loyalityflow.model
 
 val sampleDashboardStats = DashboardStats(
     userName = "Ali",
