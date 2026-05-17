@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,13 +26,12 @@ class ProfileViewModel @Inject constructor(
 
     private fun loadProfile() {
         viewModelScope.launch {
-            repository.getProfile().collect { profileInfo ->
-                if (profileInfo != null) {
+            // Wait for profile to be seeded if it's currently null
+            repository.getProfile()
+                .filterNotNull()
+                .collect { profileInfo ->
                     _uiState.value = ProfileUiState.Success(profileInfo)
-                } else {
-                    _uiState.value = ProfileUiState.Error("Profile not found")
                 }
-            }
         }
     }
 }

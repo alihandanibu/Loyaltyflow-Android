@@ -1,5 +1,10 @@
 package com.example.loyalityflow.model
 
+import com.example.loyalityflow.data.model.DashboardStats
+import com.example.loyalityflow.data.model.Offer
+import com.example.loyalityflow.data.model.ProfileInfo
+import com.example.loyalityflow.data.model.Reward
+
 val sampleDashboardStats = DashboardStats(
     userName = "Ali",
     totalPoints = 1240,

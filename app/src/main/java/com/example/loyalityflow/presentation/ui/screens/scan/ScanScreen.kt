@@ -1,27 +1,25 @@
 package com.example.loyalityflow.presentation.ui.screens.scan
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.loyalityflow.presentation.ui.components.SectionHeader
 import com.example.loyalityflow.presentation.ui.screens.scan.components.ScanInputField
 
-/**
- * STATEFUL Screen - Connected to ViewModel
- */
 @Composable
 fun ScanScreen(viewModel: ScanViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -41,10 +39,28 @@ fun ScanScreen(viewModel: ScanViewModel = hiltViewModel()) {
         }
         is ScanUiState.Success -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = state.message, style = MaterialTheme.typography.headlineSmall)
-                    Button(onClick = { viewModel.resetForm() }) {
-                        Text("Scan another")
+                Card(
+                    modifier = Modifier.padding(24.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = "Success!",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(text = state.message, style = MaterialTheme.typography.bodyLarge)
+                        Button(
+                            onClick = { viewModel.resetForm() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Scan another")
+                        }
                     }
                 }
             }
@@ -57,9 +73,6 @@ fun ScanScreen(viewModel: ScanViewModel = hiltViewModel()) {
     }
 }
 
-/**
- * STATELESS Screen - Pure UI
- */
 @Composable
 fun ScanContent(
     state: ScanUiState.Editing,
@@ -69,11 +82,31 @@ fun ScanContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SectionHeader(title = "Scan Receipt")
         
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Vizuelni deo za skener
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.AddCircle,
+                contentDescription = null,
+                modifier = Modifier.size(80.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         ScanInputField(
             value = state.storeName,
             onValueChange = onStoreNameChange,
@@ -81,12 +114,17 @@ fun ScanContent(
             placeholder = "Enter store name (e.g. Walmart)"
         )
 
+        Spacer(modifier = Modifier.weight(1f))
+
         Button(
             onClick = onSubmit,
-            modifier = Modifier.fillMaxSize(),
-            enabled = state.isSubmitEnabled
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            enabled = state.isSubmitEnabled,
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Submit Receipt")
+            Text("Submit Receipt", style = MaterialTheme.typography.titleMedium)
         }
     }
 }

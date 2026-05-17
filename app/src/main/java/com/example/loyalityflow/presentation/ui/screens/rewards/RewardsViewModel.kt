@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loyalityflow.data.repository.LoyaltyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class RewardsViewModel @Inject constructor(
     private val repository: LoyaltyRepository
@@ -26,30 +28,30 @@ class RewardsViewModel @Inject constructor(
     private fun observeRewards() {
         viewModelScope.launch {
             try {
-                combine(
-                    repository.getAllRewards(),
-                    repository.getProfile(),
-                    _selectedCategory,
-                    _searchKeyword
-                ) { rewards, profile, selectedCategory, searchKeyword ->
-                    if (profile == null) {
-                        RewardsUiState.Error("Profile not found")
-                    } else {
-                        val points = profile.totalScans * 10
-                        val affordableCount = rewards.count { it.pointsRequired <= points }
-                        val categories = listOf("All") + rewards.map { it.category }.distinct().sorted()
+                // filterNotNull() će zaustaviti tok dok se profil ne pojavi u bazi (koju repository popunjava pri startu)
+                repository.getProfile()
+                    .filterNotNull()
+                    .flatMapLatest { profile ->
+                        combine(
+                            repository.getAllRewards(),
+                            _selectedCategory,
+                            _searchKeyword
+                        ) { rewards, selectedCategory, searchKeyword ->
+                            val points = profile.totalScans * 10
+                            val affordableCount = rewards.count { it.pointsRequired <= points }
+                            val categories = listOf("All") + rewards.map { it.category }.distinct().sorted()
 
-                        RewardsUiState.Success(
-                            rewards = rewards,
-                            categories = categories,
-                            selectedCategory = selectedCategory,
-                            searchKeyword = searchKeyword,
-                            affordableRewardsCount = affordableCount
-                        )
+                            RewardsUiState.Success(
+                                rewards = rewards,
+                                categories = categories,
+                                selectedCategory = selectedCategory,
+                                searchKeyword = searchKeyword,
+                                affordableRewardsCount = affordableCount
+                            )
+                        }
+                    }.collect { state ->
+                        _uiState.value = state
                     }
-                }.collect { state ->
-                    _uiState.value = state
-                }
             } catch (e: Exception) {
                 _uiState.value = RewardsUiState.Error(e.message ?: "Unknown error")
             }
