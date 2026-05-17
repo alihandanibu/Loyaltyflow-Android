@@ -4,10 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loyalityflow.data.repository.LoyaltyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,7 +12,11 @@ import javax.inject.Inject
 class RewardsViewModel @Inject constructor(
     private val repository: LoyaltyRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(RewardsUiState())
+
+    private val _selectedCategory = MutableStateFlow("All")
+    private val _searchKeyword = MutableStateFlow("")
+
+    private val _uiState = MutableStateFlow<RewardsUiState>(RewardsUiState.Loading)
     val uiState: StateFlow<RewardsUiState> = _uiState.asStateFlow()
 
     init {
@@ -24,18 +25,42 @@ class RewardsViewModel @Inject constructor(
 
     private fun observeRewards() {
         viewModelScope.launch {
-            repository.allRewards.collect { rewardsList ->
-                _uiState.update { it.copy(rewards = rewardsList) }
+            try {
+                combine(
+                    repository.getAllRewards(),
+                    repository.getProfile(),
+                    _selectedCategory,
+                    _searchKeyword
+                ) { rewards, profile, selectedCategory, searchKeyword ->
+                    if (profile == null) {
+                        RewardsUiState.Error("Profile not found")
+                    } else {
+                        val points = profile.totalScans * 10
+                        val affordableCount = rewards.count { it.pointsRequired <= points }
+                        val categories = listOf("All") + rewards.map { it.category }.distinct().sorted()
+
+                        RewardsUiState.Success(
+                            rewards = rewards,
+                            categories = categories,
+                            selectedCategory = selectedCategory,
+                            searchKeyword = searchKeyword,
+                            affordableRewardsCount = affordableCount
+                        )
+                    }
+                }.collect { state ->
+                    _uiState.value = state
+                }
+            } catch (e: Exception) {
+                _uiState.value = RewardsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
 
     fun onCategorySelected(category: String) {
-        _uiState.update { it.copy(selectedCategory = category) }
-        // U Assignment 4 ovde možeš dodati filtriranje direktno u bazi (Query)
+        _selectedCategory.value = category
     }
 
     fun onSearchQueryChanged(query: String) {
-        _uiState.update { it.copy(searchKeyword = query) }
+        _searchKeyword.value = query
     }
 }

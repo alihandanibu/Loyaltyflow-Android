@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,14 +14,22 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val repository: LoyaltyRepository
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(ProfileUiState())
+    
+    // Set initial state to Loading
+    private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
+        loadProfile()
+    }
+
+    private fun loadProfile() {
         viewModelScope.launch {
-            repository.profile.collect { profileInfo ->
-                profileInfo?.let { info ->
-                    _uiState.update { it.copy(profileInfo = info) }
+            repository.getProfile().collect { profileInfo ->
+                if (profileInfo != null) {
+                    _uiState.value = ProfileUiState.Success(profileInfo)
+                } else {
+                    _uiState.value = ProfileUiState.Error("Profile not found")
                 }
             }
         }
