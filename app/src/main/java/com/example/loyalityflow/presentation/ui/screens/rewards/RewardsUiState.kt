@@ -1,11 +1,20 @@
 package com.example.loyalityflow.presentation.ui.screens.rewards
 
-import com.example.loyalityflow.model.Reward
-import com.example.loyalityflow.model.sampleRewards
+import com.example.loyalityflow.data.model.Reward
 
-data class RewardsUiState(
-    val rewards: List<Reward> = sampleRewards,
-    val selectedCategory: String = "All",
-    val searchKeyword: String = "",
-    val affordableRewardsCount: Int = 0
-)
+/**
+ * Requirement: Each ViewModel should have its own UiState (Init, Success, Loading, Error).
+ */
+sealed interface RewardsUiState {
+    data object Loading : RewardsUiState
+    
+    data class Success(
+        val rewards: List<Reward>,
+        val categories: List<String>,
+        val selectedCategory: String,
+        val searchKeyword: String,
+        val affordableRewardsCount: Int
+    ) : RewardsUiState
+    
+    data class Error(val message: String) : RewardsUiState
+}

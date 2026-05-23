@@ -8,15 +8,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.loyalityflow.presentation.navigation.LoyaltyFlowApp
 import com.example.loyalityflow.presentation.theme.LoyalityFlowTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // LoyaltyFlowTheme se sada nalazi u presentation.theme
             LoyalityFlowTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    // Glavna aplikacija se sada nalazi u presentation.navigation
                     LoyaltyFlowApp()
                 }
             }

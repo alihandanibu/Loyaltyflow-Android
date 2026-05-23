@@ -11,6 +11,7 @@ fun ScanInputField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    placeholder: String = "",
     isError: Boolean = false,
     supportingText: String? = null
 ) {
@@ -18,6 +19,7 @@ fun ScanInputField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
+        placeholder = { Text(placeholder) },
         isError = isError,
         supportingText = supportingText?.let { { Text(it) } },
         modifier = Modifier.fillMaxWidth()

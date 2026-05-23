@@ -1,5 +1,6 @@
 package com.example.loyalityflow.presentation.navigation
 
+import android.net.Uri
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
@@ -19,9 +20,10 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector?
     data object Rewards : Screen("rewards", "Rewards", Icons.Filled.Star)
     data object Profile : Screen("profile", "Profile", Icons.Filled.Person)
     
-    // Nested route for details, passing an ID
-    data object RewardDetails : Screen("reward_details/{rewardId}", "Reward details") {
-        fun createRoute(rewardId: Int): String = "reward_details/$rewardId"
+    // Nested route for details, passing two arguments
+    data object RewardDetails : Screen("reward_details/{rewardId}/{rewardTitle}", "Reward details") {
+        fun createRoute(rewardId: Int, rewardTitle: String): String =
+            "reward_details/$rewardId/${Uri.encode(rewardTitle)}"
     }
 }
 

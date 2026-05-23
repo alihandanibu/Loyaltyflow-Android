@@ -1,7 +1,9 @@
 package com.example.loyalityflow.presentation.ui.screens.rewarddetails
 
-import com.example.loyalityflow.model.Reward
+import com.example.loyalityflow.data.model.Reward
 
-data class RewardDetailsUiState(
-    val reward: Reward? = null
-)
+sealed interface RewardDetailsUiState {
+    data object Loading : RewardDetailsUiState
+    data class Success(val reward: Reward) : RewardDetailsUiState
+    data class Error(val message: String) : RewardDetailsUiState
+}

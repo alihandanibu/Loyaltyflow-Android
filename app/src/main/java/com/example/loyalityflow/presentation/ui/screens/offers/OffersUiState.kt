@@ -1,8 +1,9 @@
 package com.example.loyalityflow.presentation.ui.screens.offers
 
-import com.example.loyalityflow.model.Offer
-import com.example.loyalityflow.model.sampleOffers
+import com.example.loyalityflow.data.model.Offer
 
-data class OffersUiState(
-    val offers: List<Offer> = sampleOffers
-)
+sealed interface OffersUiState {
+    data object Loading : OffersUiState
+    data class Success(val offers: List<Offer>) : OffersUiState
+    data class Error(val message: String) : OffersUiState
+}

@@ -10,10 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.loyalityflow.presentation.ui.screens.home.HomeScreen
 import com.example.loyalityflow.presentation.ui.screens.offers.OffersScreen
 import com.example.loyalityflow.presentation.ui.screens.profile.ProfileScreen
@@ -85,8 +87,8 @@ fun LoyaltyFlowApp() {
 
             composable(Screen.Rewards.route) {
                 RewardsScreen(
-                    onRewardClick = { rewardId ->
-                        navController.navigate(Screen.RewardDetails.createRoute(rewardId))
+                    onRewardClick = { rewardId, rewardTitle ->
+                        navController.navigate(Screen.RewardDetails.createRoute(rewardId, rewardTitle))
                     }
                 )
             }
@@ -95,11 +97,18 @@ fun LoyaltyFlowApp() {
                 ProfileScreen()
             }
 
-            composable(Screen.RewardDetails.route) { backStackEntry ->
-                // Parsing ID from the route argument
-                val rewardId = backStackEntry.arguments?.getString("rewardId")?.toIntOrNull() ?: 0
+            composable(
+                route = Screen.RewardDetails.route,
+                arguments = listOf(
+                    navArgument("rewardId") { type = NavType.IntType },
+                    navArgument("rewardTitle") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val rewardId = backStackEntry.arguments?.getInt("rewardId") ?: 0
+                val rewardTitle = backStackEntry.arguments?.getString("rewardTitle").orEmpty()
                 RewardDetailsScreen(
                     rewardId = rewardId,
+                    rewardTitle = rewardTitle,
                     onBackClick = { navController.popBackStack() }
                 )
             }

@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.loyalityflow.model.DashboardStats
+import com.example.loyalityflow.data.model.DashboardStats
 
 @Composable
 fun DashboardCard(stats: DashboardStats) {
