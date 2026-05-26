@@ -89,7 +89,7 @@ fun ScanContent(
         
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Vizuelni deo za skener
+        // Vizuelni dio za skener
         Box(
             modifier = Modifier
                 .size(200.dp)
