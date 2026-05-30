@@ -16,7 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.loyalityflow.presentation.ui.screens.auth.AuthScreen
 import com.example.loyalityflow.presentation.ui.screens.home.HomeScreen
+import com.example.loyalityflow.presentation.ui.screens.network.LoyaltyCardsNetworkScreen
 import com.example.loyalityflow.presentation.ui.screens.offers.OffersScreen
 import com.example.loyalityflow.presentation.ui.screens.profile.ProfileScreen
 import com.example.loyalityflow.presentation.ui.screens.rewarddetails.RewardDetailsScreen
@@ -33,6 +35,7 @@ fun LoyaltyFlowApp() {
         bottomBar = {
             NavigationBar {
                 bottomNavItems.forEach { screen ->
+                    val isSelected = currentRoute == screen.route
                     NavigationBarItem(
                         icon = {
                             screen.icon?.let { icon ->
@@ -43,19 +46,14 @@ fun LoyaltyFlowApp() {
                             }
                         },
                         label = { Text(screen.title) },
-                        selected = currentRoute == screen.route,
+                        selected = isSelected,
+                        alwaysShowLabel = false, // Centriranje ikonica
                         onClick = {
                             navController.navigate(screen.route) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
-                                // on the back stack as users select items
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
-                                // Avoid multiple copies of the same destination when
-                                // reselecting the same item
                                 launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
                                 restoreState = true
                             }
                         }
@@ -67,7 +65,6 @@ fun LoyaltyFlowApp() {
         NavHost(
             navController = navController,
             startDestination = Screen.Home.route,
-            // innerPadding is used to avoid the bottom navigation bar overlapping content
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Home.route) {
@@ -86,15 +83,22 @@ fun LoyaltyFlowApp() {
             }
 
             composable(Screen.Rewards.route) {
-                RewardsScreen(
-                    onRewardClick = { rewardId, rewardTitle ->
-                        navController.navigate(Screen.RewardDetails.createRoute(rewardId, rewardTitle))
-                    }
-                )
+                RewardsScreen()
             }
 
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(
+                    onNavigateToAuth = { navController.navigate(Screen.Auth.route) },
+                    onNavigateToNetwork = { navController.navigate(Screen.NetworkCards.route) }
+                )
+            }
+
+            composable(Screen.NetworkCards.route) {
+                LoyaltyCardsNetworkScreen()
+            }
+
+            composable(Screen.Auth.route) {
+                AuthScreen()
             }
 
             composable(

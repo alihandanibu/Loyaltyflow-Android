@@ -10,21 +10,21 @@ import retrofit2.http.Path
 
 interface LoyaltyCardApiService {
 
-    @GET("loyalty-cards")
+    @GET("posts")
     suspend fun getLoyaltyCards(): List<LoyaltyCardDto>
 
-    @POST("loyalty-cards")
+    @POST("posts")
     suspend fun createLoyaltyCard(
         @Body loyaltyCardDto: LoyaltyCardDto
     ): LoyaltyCardDto
 
-    @PUT("loyalty-cards/{id}")
+    @PUT("posts/{id}")
     suspend fun updateLoyaltyCard(
         @Path("id") id: Int,
         @Body loyaltyCardDto: LoyaltyCardDto
     ): LoyaltyCardDto
 
-    @DELETE("loyalty-cards/{id}")
+    @DELETE("posts/{id}")
     suspend fun deleteLoyaltyCard(
         @Path("id") id: Int
     )

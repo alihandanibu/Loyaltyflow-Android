@@ -11,7 +11,7 @@ class LoyaltyCardRepositoryImpl @Inject constructor(
     override suspend fun getLoyaltyCards(): Result<List<LoyaltyCardDto>> {
         return try {
             val cards = apiService.getLoyaltyCards()
-            Result.success(cards)
+            Result.success(cards.take(10))
         } catch (exception: Exception) {
             Result.failure(exception)
         }
