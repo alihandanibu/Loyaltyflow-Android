@@ -1,115 +1,103 @@
 package com.example.loyalityflow.presentation.ui.screens.rewards
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.loyalityflow.presentation.ui.components.SectionHeader
-import com.example.loyalityflow.presentation.ui.screens.rewards.components.CategoryChip
-import com.example.loyalityflow.presentation.ui.screens.rewards.components.EmptyRewardsState
-import com.example.loyalityflow.presentation.ui.screens.rewards.components.RewardCard
-import com.example.loyalityflow.presentation.ui.screens.rewards.components.SearchBar
 
-/**
- * STATEFUL Screen - Connected to ViewModel
- */
 @Composable
 fun RewardsScreen(
-    onRewardClick: (Int, String) -> Unit,
     viewModel: RewardsViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsState()
 
-    when (val state = uiState) {
-        is RewardsUiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-        is RewardsUiState.Success -> {
-            RewardsContent(
-                state = state,
-                onRewardClick = onRewardClick,
-                onSearchChange = { viewModel.onSearchQueryChanged(it) },
-                onCategorySelect = { viewModel.onCategorySelected(it) }
-            )
-        }
-        is RewardsUiState.Error -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(text = state.message, color = MaterialTheme.colorScheme.error)
-            }
-        }
-    }
-}
-
-/**
- * STATELESS Screen - Purely for UI
- */
-@Composable
-fun RewardsContent(
-    state: RewardsUiState.Success,
-    onRewardClick: (Int, String) -> Unit,
-    onSearchChange: (String) -> Unit,
-    onCategorySelect: (String) -> Unit
-) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
-        SectionHeader(title = "Reward catalog")
-        
-        SearchBar(
-            query = state.searchKeyword,
-            onQueryChange = onSearchChange
+        Text(
+            text = "Firestore Realtime Rewards",
+            style = MaterialTheme.typography.headlineSmall
         )
 
-        LazyRow(
-            contentPadding = PaddingValues(bottom = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = { viewModel.addDemoReward() }
         ) {
-            items(state.categories) { category ->
-                CategoryChip(
-                    category = category,
-                    isSelected = state.selectedCategory == category,
-                    onClick = { onCategorySelect(category) }
-                )
-            }
+            Text("Add Firestore Reward")
         }
 
-        if (state.affordableRewardsCount > 0) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        AnimatedVisibility(visible = uiState.isLoading) {
+            CircularProgressIndicator()
+        }
+
+        AnimatedVisibility(visible = uiState.successMessage != null) {
             Text(
-                text = "You have ${state.affordableRewardsCount} affordable rewards!",
-                style = MaterialTheme.typography.bodySmall,
+                text = uiState.successMessage.orEmpty(),
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
-        if (state.rewards.isEmpty()) {
-            EmptyRewardsState()
-        } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(state.rewards) { reward ->
-                    RewardCard(reward = reward, onClick = { onRewardClick(reward.id, reward.title) })
+        AnimatedVisibility(visible = uiState.errorMessage != null) {
+            Text(
+                text = uiState.errorMessage.orEmpty(),
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn {
+            items(uiState.rewards) { reward ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        Text(
+                            text = reward.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+
+                        Text(
+                            text = "Points: ${reward.points}",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            text = "Document ID: ${reward.id}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        OutlinedButton(
+                            onClick = { viewModel.deleteReward(reward.id) }
+                        ) {
+                            Text("Delete")
+                        }
+                    }
                 }
             }
         }

@@ -2,23 +2,20 @@ package com.example.loyalityflow.presentation.ui.screens.rewards
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.loyalityflow.data.repository.LoyaltyRepository
+import com.example.loyalityflow.data.firebase.firestore.RewardsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class RewardsViewModel @Inject constructor(
-    private val repository: LoyaltyRepository
+    private val rewardsRepository: RewardsRepository
 ) : ViewModel() {
 
-    private val _selectedCategory = MutableStateFlow("All")
-    private val _searchKeyword = MutableStateFlow("")
-
-    private val _uiState = MutableStateFlow<RewardsUiState>(RewardsUiState.Loading)
+    private val _uiState = MutableStateFlow(RewardsUiState(isLoading = true))
     val uiState: StateFlow<RewardsUiState> = _uiState.asStateFlow()
 
     init {
@@ -27,42 +24,63 @@ class RewardsViewModel @Inject constructor(
 
     private fun observeRewards() {
         viewModelScope.launch {
-            try {
-                // filterNotNull() će zaustaviti tok dok se profil ne pojavi u bazi (koju repository popunjava pri startu)
-                repository.getProfile()
-                    .filterNotNull()
-                    .flatMapLatest { profile ->
-                        combine(
-                            repository.getAllRewards(),
-                            _selectedCategory,
-                            _searchKeyword
-                        ) { rewards, selectedCategory, searchKeyword ->
-                            val points = profile.totalScans * 10
-                            val affordableCount = rewards.count { it.pointsRequired <= points }
-                            val categories = listOf("All") + rewards.map { it.category }.distinct().sorted()
-
-                            RewardsUiState.Success(
-                                rewards = rewards,
-                                categories = categories,
-                                selectedCategory = selectedCategory,
-                                searchKeyword = searchKeyword,
-                                affordableRewardsCount = affordableCount
-                            )
-                        }
-                    }.collect { state ->
-                        _uiState.value = state
+            rewardsRepository.observeRewards().collect { result ->
+                result
+                    .onSuccess { rewards ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            rewards = rewards,
+                            errorMessage = null
+                        )
                     }
-            } catch (e: Exception) {
-                _uiState.value = RewardsUiState.Error(e.message ?: "Unknown error")
+                    .onFailure { exception ->
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            errorMessage = exception.message ?: "Failed to observe rewards"
+                        )
+                    }
             }
         }
     }
 
-    fun onCategorySelected(category: String) {
-        _selectedCategory.value = category
+    fun addDemoReward() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                successMessage = null,
+                errorMessage = null
+            )
+
+            val result = rewardsRepository.addDemoReward()
+
+            result
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        successMessage = "Reward added. Firestore realtime listener will update the list."
+                    )
+                }
+                .onFailure { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = exception.message ?: "Failed to add reward"
+                    )
+                }
+        }
     }
 
-    fun onSearchQueryChanged(query: String) {
-        _searchKeyword.value = query
+    fun deleteReward(id: String) {
+        viewModelScope.launch {
+            val result = rewardsRepository.deleteReward(id)
+
+            result
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        successMessage = "Reward deleted"
+                    )
+                }
+                .onFailure { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = exception.message ?: "Failed to delete reward"
+                    )
+                }
+        }
     }
 }
